@@ -7,16 +7,16 @@
 #include "chainparams.h"
 #include "main.h"
 #include "txdb.h"
-#include "zpiv/deterministicmint.h"
+#include "zgrow/deterministicmint.h"
 #include "key.h"
-#include "zpiv/accumulatorcheckpoints.h"
+#include "zgrow/accumulatorcheckpoints.h"
 #include "libzerocoin/bignum.h"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <zpiv/accumulators.h>
+#include <zgrow/accumulators.h>
 #include "wallet/wallet.h"
-#include "zpiv/zpivwallet.h"
-#include "zpivchain.h"
+#include "zgrow/zgrowwallet.h"
+#include "zgrowchain.h"
 
 using namespace libzerocoin;
 
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(deterministic_tests)
     CWalletDB walletdb(strWalletFile, "cr+");
 
     CWallet wallet(strWalletFile);
-    CzPIVWallet zWallet(wallet.strWalletFile);
+    CzGROWWallet zWallet(wallet.strWalletFile);
     zWallet.SetMasterSeed(seedMaster);
     wallet.setZWallet(&zWallet);
 
@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE(deterministic_tests)
     for (int i = 0; i < nTests; i++) {
         PrivateCoin coin(Params().Zerocoin_Params(false), denom, false);
         CDeterministicMint dMint;
-        zWallet.GenerateDeterministicZPIV(denom, coin, dMint);
+        zWallet.GenerateDeterministicZGROW(denom, coin, dMint);
         vCoins.emplace_back(coin);
     }
 

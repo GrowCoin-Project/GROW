@@ -9,7 +9,7 @@
  * @copyright  Copyright 2013 Ian Miers, Christina Garman and Matthew Green
  * @license    This project is released under the MIT license.
  **/
-// Copyright (c) 2017-2018 The PIVX developers
+// Copyright (c) 2017-2018 The GROW developers
 
 #include "CoinSpend.h"
 #include <iostream>
@@ -76,28 +76,28 @@ bool CoinSpend::Verify(const Accumulator& a, bool verifyParams) const
 {
     // Double check that the version is the same as marked in the serial
     if (ExtractVersionFromSerial(coinSerialNumber) != version) {
-        //cout << "CoinSpend::Verify: version does not match serial=" << (int)ExtractVersionFromSerial(coinSerialNumber) << " actual=" << (int)version << endl;
+        // cout << "CoinSpend::Verify: version does not match serial=" << (int)ExtractVersionFromSerial(coinSerialNumber) << " actual=" << (int)version << endl;
         return false;
     }
 
     if (a.getDenomination() != this->denomination) {
-        //std::cout << "CoinsSpend::Verify: failed, denominations do not match\n";
+        // std::cout << "CoinsSpend::Verify: failed, denominations do not match\n";
         return false;
     }
 
     // Verify both of the sub-proofs using the given meta-data
     if (!commitmentPoK.Verify(serialCommitmentToCoinValue, accCommitmentToCoinValue)) {
-        //std::cout << "CoinsSpend::Verify: commitmentPoK failed\n";
+        // std::cout << "CoinsSpend::Verify: commitmentPoK failed\n";
         return false;
     }
 
     if (!accumulatorPoK.Verify(a, accCommitmentToCoinValue)) {
-        //std::cout << "CoinsSpend::Verify: accumulatorPoK failed\n";
+        // std::cout << "CoinsSpend::Verify: accumulatorPoK failed\n";
         return false;
     }
 
     if (!serialNumberSoK.Verify(coinSerialNumber, serialCommitmentToCoinValue, signatureHash(), verifyParams)) {
-        //std::cout << "CoinsSpend::Verify: serialNumberSoK failed. sighash:" << signatureHash().GetHex() << "\n";
+        // std::cout << "CoinsSpend::Verify: serialNumberSoK failed. sighash:" << signatureHash().GetHex() << "\n";
         return false;
     }
 
@@ -136,13 +136,13 @@ bool CoinSpend::HasValidSignature() const
         return true;
 
     try {
-        //V2 serial requires that the signature hash be signed by the public key associated with the serial
-        uint256 hashedPubkey = Hash(pubkey.begin(), pubkey.end()) >> PrivateCoin::V2_BITSHIFT;
-        if (hashedPubkey != GetAdjustedSerial(coinSerialNumber).getuint256()) {
-            //cout << "CoinSpend::HasValidSignature() hashedpubkey is not equal to the serial!\n";
-            return false;
-        }
-    } catch(std::range_error &e) {
+    //V2 serial requires that the signature hash be signed by the public key associated with the serial
+    uint256 hashedPubkey = Hash(pubkey.begin(), pubkey.end()) >> PrivateCoin::V2_BITSHIFT;
+    if (hashedPubkey != GetAdjustedSerial(coinSerialNumber).getuint256()) {
+        //cout << "CoinSpend::HasValidSignature() hashedpubkey is not equal to the serial!\n";
+        return false;
+    }
+    }catch(std::range_error &e){
         //std::cout << "HasValidSignature() error: " << e.what() << std::endl;
         throw InvalidSerialException("Serial longer than 256 bits");
     }

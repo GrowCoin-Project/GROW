@@ -9,7 +9,7 @@
  * @copyright  Copyright 2013 Ian Miers, Christina Garman and Matthew Green
  * @license    This project is released under the MIT license.
  **/
-// Copyright (c) 2017 The PIVX developers
+// Copyright (c) 2017 The GROW developers
 
 #include "AccumulatorProofOfKnowledge.h"
 #include "hash.h"
@@ -33,7 +33,7 @@ AccumulatorProofOfKnowledge::AccumulatorProofOfKnowledge(const AccumulatorAndPro
 	CBigNum aM_4 = params->accumulatorModulus/CBigNum((long)4);
     CBigNum aR = CBigNum(2).pow(params->k_prime + params->k_dprime);
     CBigNum aR_t_aM_4 = aM_4 * aR;
-
+	
     CBigNum r_1 = CBigNum::randBignum(aM_4);
     CBigNum r_2 = CBigNum::randBignum(aM_4);
     CBigNum r_3 = CBigNum::randBignum(aM_4);
@@ -126,6 +126,7 @@ bool AccumulatorProofOfKnowledge:: Verify(const Accumulator& a, const CBigNum& v
 	CBigNum t_2_prime = (C_e.pow_mod(c, params->accumulatorModulus) * h_n.pow_mod(s_eta, params->accumulatorModulus) * g_n.pow_mod(s_alpha, params->accumulatorModulus)) % params->accumulatorModulus;
 	CBigNum t_3_prime = ((a.getValue()).pow_mod(c, params->accumulatorModulus) * C_u.pow_mod(s_alpha, params->accumulatorModulus) * ((h_n.inverse(params->accumulatorModulus)).pow_mod(s_beta, params->accumulatorModulus))) % params->accumulatorModulus;
 	CBigNum t_4_prime = (C_r.pow_mod(s_alpha, params->accumulatorModulus) * ((h_n.inverse(params->accumulatorModulus)).pow_mod(s_delta, params->accumulatorModulus)) * ((g_n.inverse(params->accumulatorModulus)).pow_mod(s_beta, params->accumulatorModulus))) % params->accumulatorModulus;
+
 
 	bool result_st1 = (st_1 == st_1_prime);
 	bool result_st2 = (st_2 == st_2_prime);

@@ -1,7 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2018 The PIVX developers
+// Copyright (c) 2015-2018 The GROW developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -268,11 +268,11 @@ UniValue stop(const UniValue& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw runtime_error(
             "stop\n"
-            "\nStop PIVX server.");
+            "\nStop GROW server.");
     // Event loop will exit after current HTTP requests have been handled, so
     // this reply will get back to the client.
     StartShutdown();
-    return "PIVX server stopping";
+    return "GROW server stopping";
 }
 
 
@@ -304,6 +304,7 @@ static const CRPCCommand vRPCCommands[] =
         /* Block chain and UTXO */
         {"blockchain", "findserial", &findserial, true, false, false},
         {"blockchain", "getaccumulatorvalues", &getaccumulatorvalues, true, false, false},
+        {"blockchain", "calculateaccumulatorvalues", &calculateaccumulatorvalues, true, false, false},
         {"blockchain", "getaccumulatorwitness", &getaccumulatorwitness, true, false, false},
         {"blockchain", "getmintsinblocks", &getmintsinblocks, true, false, false},
         {"blockchain", "getserials", &getserials, true, false, false},
@@ -364,35 +365,37 @@ static const CRPCCommand vRPCCommands[] =
         { "hidden",             "waitforblock",           &waitforblock,           true,  true,  false  },
         { "hidden",             "waitforblockheight",     &waitforblockheight,     true,  true,  false  },
 
-        /* PIVX features */
-        {"pivx", "listmasternodes", &listmasternodes, true, true, false},
-        {"pivx", "getmasternodecount", &getmasternodecount, true, true, false},
-        {"pivx", "masternodeconnect", &masternodeconnect, true, true, false},
-        {"pivx", "createmasternodebroadcast", &createmasternodebroadcast, true, true, false},
-        {"pivx", "decodemasternodebroadcast", &decodemasternodebroadcast, true, true, false},
-        {"pivx", "relaymasternodebroadcast", &relaymasternodebroadcast, true, true, false},
-        {"pivx", "masternodecurrent", &masternodecurrent, true, true, false},
-        {"pivx", "masternodedebug", &masternodedebug, true, true, false},
-        {"pivx", "startmasternode", &startmasternode, true, true, false},
-        {"pivx", "createmasternodekey", &createmasternodekey, true, true, false},
-        {"pivx", "getmasternodeoutputs", &getmasternodeoutputs, true, true, false},
-        {"pivx", "listmasternodeconf", &listmasternodeconf, true, true, false},
-        {"pivx", "getmasternodestatus", &getmasternodestatus, true, true, false},
-        {"pivx", "getmasternodewinners", &getmasternodewinners, true, true, false},
-        {"pivx", "getmasternodescores", &getmasternodescores, true, true, false},
-        {"pivx", "preparebudget", &preparebudget, true, true, false},
-        {"pivx", "submitbudget", &submitbudget, true, true, false},
-        {"pivx", "mnbudgetvote", &mnbudgetvote, true, true, false},
-        {"pivx", "getbudgetvotes", &getbudgetvotes, true, true, false},
-        {"pivx", "getnextsuperblock", &getnextsuperblock, true, true, false},
-        {"pivx", "getbudgetprojection", &getbudgetprojection, true, true, false},
-        {"pivx", "getbudgetinfo", &getbudgetinfo, true, true, false},
-        {"pivx", "mnbudgetrawvote", &mnbudgetrawvote, true, true, false},
-        {"pivx", "mnfinalbudget", &mnfinalbudget, true, true, false},
-        {"pivx", "checkbudgets", &checkbudgets, true, true, false},
-        {"pivx", "mnsync", &mnsync, true, true, false},
-        {"pivx", "spork", &spork, true, true, false},
-        {"pivx", "getpoolinfo", &getpoolinfo, true, true, false},
+        /* GROW features */
+        {"grow", "masternode", &masternode, true, true, false},
+        {"grow", "listmasternodes", &listmasternodes, true, true, false},
+        {"grow", "getmasternodecount", &getmasternodecount, true, true, false},
+        {"grow", "masternodeconnect", &masternodeconnect, true, true, false},
+        {"grow", "createmasternodebroadcast", &createmasternodebroadcast, true, true, false},
+        {"grow", "decodemasternodebroadcast", &decodemasternodebroadcast, true, true, false},
+        {"grow", "relaymasternodebroadcast", &relaymasternodebroadcast, true, true, false},
+        {"grow", "masternodecurrent", &masternodecurrent, true, true, false},
+        {"grow", "masternodedebug", &masternodedebug, true, true, false},
+        {"grow", "startmasternode", &startmasternode, true, true, false},
+        {"grow", "createmasternodekey", &createmasternodekey, true, true, false},
+        {"grow", "getmasternodeoutputs", &getmasternodeoutputs, true, true, false},
+        {"grow", "listmasternodeconf", &listmasternodeconf, true, true, false},
+        {"grow", "getmasternodestatus", &getmasternodestatus, true, true, false},
+        {"grow", "getmasternodewinners", &getmasternodewinners, true, true, false},
+        {"grow", "getmasternodescores", &getmasternodescores, true, true, false},
+        {"grow", "mnbudget", &mnbudget, true, true, false},
+        {"grow", "preparebudget", &preparebudget, true, true, false},
+        {"grow", "submitbudget", &submitbudget, true, true, false},
+        {"grow", "mnbudgetvote", &mnbudgetvote, true, true, false},
+        {"grow", "getbudgetvotes", &getbudgetvotes, true, true, false},
+        {"grow", "getnextsuperblock", &getnextsuperblock, true, true, false},
+        {"grow", "getbudgetprojection", &getbudgetprojection, true, true, false},
+        {"grow", "getbudgetinfo", &getbudgetinfo, true, true, false},
+        {"grow", "mnbudgetrawvote", &mnbudgetrawvote, true, true, false},
+        {"grow", "mnfinalbudget", &mnfinalbudget, true, true, false},
+        {"grow", "checkbudgets", &checkbudgets, true, true, false},
+        {"grow", "mnsync", &mnsync, true, true, false},
+        {"grow", "spork", &spork, true, true, false},
+        {"grow", "getpoolinfo", &getpoolinfo, true, true, false},
 
 #ifdef ENABLE_WALLET
         /* Wallet */
@@ -462,11 +465,11 @@ static const CRPCCommand vRPCCommands[] =
         {"zerocoin", "exportzerocoins", &exportzerocoins, false, false, true},
         {"zerocoin", "reconsiderzerocoins", &reconsiderzerocoins, false, false, true},
         {"zerocoin", "getspentzerocoinamount", &getspentzerocoinamount, false, false, false},
-        {"zerocoin", "getzpivseed", &getzpivseed, false, false, true},
-        {"zerocoin", "setzpivseed", &setzpivseed, false, false, true},
+        {"zerocoin", "getzgrowseed", &getzgrowseed, false, false, true},
+        {"zerocoin", "setzgrowseed", &setzgrowseed, false, false, true},
         {"zerocoin", "generatemintlist", &generatemintlist, false, false, true},
-        {"zerocoin", "searchdzpiv", &searchdzpiv, false, false, true},
-        {"zerocoin", "dzpivstate", &dzpivstate, false, false, true},
+        {"zerocoin", "searchdzgrow", &searchdzgrow, false, false, true},
+        {"zerocoin", "dzgrowstate", &dzgrowstate, false, false, true},
         {"zerocoin", "clearspendcache", &clearspendcache, false, false, true}
 
 #endif // ENABLE_WALLET
@@ -631,14 +634,14 @@ std::vector<std::string> CRPCTable::listCommands() const
 
 std::string HelpExampleCli(string methodname, string args)
 {
-    return "> pivx-cli " + methodname + " " + args + "\n";
+    return "> grow-cli " + methodname + " " + args + "\n";
 }
 
 std::string HelpExampleRpc(string methodname, string args)
 {
     return "> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", "
            "\"method\": \"" +
-           methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;' http://127.0.0.1:51473/\n";
+           methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;' http://127.0.0.1:36802/\n";
 }
 
 void RPCSetTimerInterfaceIfUnset(RPCTimerInterface *iface)

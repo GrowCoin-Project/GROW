@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2018 The PIVX developers
+// Copyright (c) 2018 The GROW developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -364,9 +365,9 @@ public:
         return true;
     }
 
-    // Verify and vote on finalized budget
+    //check to see if we should vote on this
     void CheckAndVote();
-    //total pivx paid out by this budget
+    //total grow paid out by this budget
     CAmount GetTotalPayout();
     //vote on this finalized budget as a masternode
     void SubmitVote();
@@ -492,8 +493,14 @@ public:
 
     bool IsValid(std::string& strError, bool fCheckCollateral = true);
 
-    bool IsEstablished();
-    bool IsPassing(const CBlockIndex* pindexPrev, int nBlockStartBudget, int nBlockEndBudget, int mnCount);
+    bool IsEstablished()
+    {
+        // Proposals must be at least a day old to make it into a budget
+        if (Params().NetworkID() == CBaseChainParams::MAIN) return (nTime < GetTime() - (60 * 60 * 24));
+
+        // For testing purposes - 5 minutes
+        return (nTime < GetTime() - (60 * 5));
+    }
 
     std::string GetName() { return strProposalName; }
     std::string GetURL() { return strURL; }

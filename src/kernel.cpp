@@ -1,5 +1,6 @@
 // Copyright (c) 2012-2013 The PPCoin developers
 // Copyright (c) 2015-2018 The PIVX developers
+// Copyright (c) 2018 The GROW developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,7 +13,7 @@
 #include "util.h"
 #include "stakeinput.h"
 #include "utilmoneystr.h"
-#include "zpivchain.h"
+#include "zgrowchain.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ bool fTestNet = false; //Params().NetworkID() == CBaseChainParams::TESTNET;
 // Modifier interval: time to elapse before new modifier is computed
 // Set to 3-hour for production network and 20-minute for test network
 unsigned int nModifierInterval;
-int nStakeTargetSpacing = 60;
+int nStakeTargetSpacing = 2 * 60;
 unsigned int getIntervalVersion(bool fTestNet)
 {
     if (fTestNet)
@@ -82,8 +83,8 @@ static bool SelectBlockFromCandidates(
     uint64_t nStakeModifierPrev,
     const CBlockIndex** pindexSelected)
 {
-    bool fModifierV2 = false;
-    bool fFirstRun = true;
+    //bool fModifierV2 = false;
+    //bool fFirstRun = true;
     bool fSelected = false;
     uint256 hashBest = 0;
     *pindexSelected = (const CBlockIndex*)0;
@@ -94,25 +95,32 @@ static bool SelectBlockFromCandidates(
         const CBlockIndex* pindex = mapBlockIndex[item.second];
         if (fSelected && pindex->GetBlockTime() > nSelectionIntervalStop)
             break;
-
+        /* NOTE: GJH Inappropriate for Grow
         //if the lowest block height (vSortedByTimestamp[0]) is >= switch height, use new modifier calc
         if (fFirstRun){
             fModifierV2 = pindex->nHeight >= Params().ModifierUpgradeBlock();
             fFirstRun = false;
         }
+        */
 
         if (mapSelectedBlocks.count(pindex->GetBlockHash()) > 0)
             continue;
 
+        /* NOTE: GJH Inappropriate for Grow
         // compute the selection hash by hashing an input that is unique to that block
         uint256 hashProof;
         if(fModifierV2)
             hashProof = pindex->GetBlockHash();
         else
             hashProof = pindex->IsProofOfStake() ? 0 : pindex->GetBlockHash();
+        */
+        uint256 hashProof ;
 
         CDataStream ss(SER_GETHASH, 0);
+        /* NOTE: GJH Inappropriate for Grow
         ss << hashProof << nStakeModifierPrev;
+        */
+        ss << pindex->GetBlockHash() << nStakeModifierPrev;
         uint256 hashSelection = Hash(ss.begin(), ss.end());
 
         // the selection hash is divided by 2**32 so that proof-of-stake block
@@ -251,7 +259,6 @@ bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int
     const CBlockIndex* pindexFrom = mapBlockIndex[hashBlockFrom];
     nStakeModifierHeight = pindexFrom->nHeight;
     nStakeModifierTime = pindexFrom->GetBlockTime();
-    // Fixed stake modifier only for regtest
     if (Params().NetworkID() == CBaseChainParams::REGTEST) {
         nStakeModifier = pindexFrom->nStakeModifier;
         return true;
@@ -264,11 +271,14 @@ bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval) {
         if (!pindexNext) {
             // Should never happen
-            return error("Null pindexNext\n");
+             LogPrint("staking", "%s:Null pindexNext : nStakeModifierTime %d < GetBlockTime %d + nStakeModifierSelectionInterval %d nHeight=%d nHeight=%d\n",__func__, nStakeModifierTime, pindexFrom->GetBlockTime(), nStakeModifierSelectionInterval, pindexFrom->nHeight, chainActive.Height());
+             return false;
         }
 
         pindex = pindexNext;
+        LogPrint("staking", "%s:Null pindexNext 2 : nHeight=%d\n", __func__, pindexNext->nHeight );
         pindexNext = chainActive[pindexNext->nHeight + 1];
+        
         if (pindex->GeneratedStakeModifier()) {
             nStakeModifierHeight = pindex->nHeight;
             nStakeModifierTime = pindex->GetBlockTime();
@@ -302,13 +312,12 @@ bool CheckStake(const CDataStream& ssUniqueID, CAmount nValueIn, const uint64_t 
 bool Stake(CStakeInput* stakeInput, unsigned int nBits, unsigned int nTimeBlockFrom, unsigned int& nTimeTx, uint256& hashProofOfStake)
 {
     if(Params().NetworkID() != CBaseChainParams::REGTEST) {
-        if (nTimeTx < nTimeBlockFrom)
-            return error("CheckStakeKernelHash() : nTime violation");
+    if (nTimeTx < nTimeBlockFrom)
+        return error("CheckStakeKernelHash() : nTime violation");
 
         if ((nTimeBlockFrom + nStakeMinAge > nTimeTx)) // Min age requirement
-            return error("CheckStakeKernelHash() : min age violation - nTimeBlockFrom=%d nStakeMinAge=%d nTimeTx=%d",
-                         nTimeBlockFrom, nStakeMinAge, nTimeTx);
-
+        return error("CheckStakeKernelHash() : min age violation - nTimeBlockFrom=%d nStakeMinAge=%d nTimeTx=%d",
+                     nTimeBlockFrom, nStakeMinAge, nTimeTx);
     }
 
     //grab difficulty
@@ -317,8 +326,10 @@ bool Stake(CStakeInput* stakeInput, unsigned int nBits, unsigned int nTimeBlockF
 
     //grab stake modifier
     uint64_t nStakeModifier = 0;
-    if (!stakeInput->GetModifier(nStakeModifier))
-        return error("failed to get kernel stake modifier");
+    if (!stakeInput->GetModifier(nStakeModifier)) {
+        LogPrint("staking", "%s:failed to get kernel stake modifier\n",__func__);
+        return false;
+    }
 
     bool fSuccess = false;
     unsigned int nTryTime = 0;
@@ -366,7 +377,7 @@ bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake, std::uniqu
         if (spend.getSpendType() != libzerocoin::SpendType::STAKE)
             return error("%s: spend is using the wrong SpendType (%d)", __func__, (int)spend.getSpendType());
 
-        stake = std::unique_ptr<CStakeInput>(new CZPivStake(spend));
+        stake = std::unique_ptr<CStakeInput>(new CZGrowStake(spend));
     } else {
         // First try finding the previous transaction in database
         uint256 hashBlock;
@@ -378,9 +389,9 @@ bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake, std::uniqu
         if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0)))
             return error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str());
 
-        CPivStake* pivInput = new CPivStake();
-        pivInput->SetInput(txPrev, txin.prevout.n);
-        stake = std::unique_ptr<CStakeInput>(pivInput);
+        CGrowStake* growInput = new CGrowStake();
+        growInput->SetInput(txPrev, txin.prevout.n);
+        stake = std::unique_ptr<CStakeInput>(growInput);
     }
 
     CBlockIndex* pindex = stake->GetIndexFrom();

@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
 // Copyright (c) 2018 The PIVX developers
+// Copyright (c) 2018 The GROW developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -52,7 +53,9 @@ public:
         CNode::GetBanned(banMap);
 
         cachedBanlist.clear();
+
         cachedBanlist.reserve(banMap.size());
+
         for (banmap_t::iterator it = banMap.begin(); it != banMap.end(); it++)
         {
             CCombinedBan banEntry;

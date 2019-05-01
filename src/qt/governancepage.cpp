@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The PIVX developers
+// Copyright (c) 2018 The GROW developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -84,17 +84,6 @@ void GovernancePage::updateProposalList()
     std::vector<CBudgetProposal*> proposalsList = budget.GetAllProposals();
     std::sort (proposalsList.begin(), proposalsList.end(), sortProposalsByVotes());
     int nRow = 0;
-    CBlockIndex* pindexPrev;
-    {
-        LOCK(cs_main);
-        pindexPrev = chainActive.Tip();
-    }
-    if (!pindexPrev) return;
-    int nBlockStart = pindexPrev->nHeight - pindexPrev->nHeight % Params().GetBudgetCycleBlocks() + Params().GetBudgetCycleBlocks();
-    int nBlocksLeft = nBlockStart - pindexPrev->nHeight;
-    int nBlockEnd = nBlockStart + Params().GetBudgetCycleBlocks() - 1;
-    int mnCount = mnodeman.CountEnabled(ActiveProtocol());
-
     for (CBudgetProposal* pbudgetProposal : proposalsList) {
         if (!pbudgetProposal->fValid) continue;
         if (pbudgetProposal->GetRemainingPaymentCount() < 1) continue;
@@ -107,13 +96,8 @@ void GovernancePage::updateProposalList()
         if (std::find(allotedProposals.begin(), allotedProposals.end(), pbudgetProposal) != allotedProposals.end()) {
             nTotalAllotted += pbudgetProposal->GetAllotted();
             proposalFrame->setObjectName(QStringLiteral("proposalFramePassing"));
-        } else if (!pbudgetProposal->IsEstablished()) {
-            proposalFrame->setObjectName(QStringLiteral("proposalFrameNotEstablished"));
-        } else if (pbudgetProposal->IsPassing(pindexPrev, nBlockStart, nBlockEnd, mnCount)) {
-            proposalFrame->setObjectName(QStringLiteral("proposalFramePassingUnfunded"));
-        } else {
+        } else
             proposalFrame->setObjectName(QStringLiteral("proposalFrame"));
-        }
         proposalFrame->setFrameShape(QFrame::StyledPanel);
 
         if (extendedProposal == pbudgetProposal)
@@ -124,12 +108,23 @@ void GovernancePage::updateProposalList()
         ++nRow;
     }
 
-    ui->next_superblock_value->setText(QString::number(nBlockStart));
-    ui->blocks_before_super_value->setText(QString::number(nBlocksLeft));
-    ui->time_before_super_value->setText(QString::number(nBlocksLeft/60/24));
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    int nNext, nLeft;
+    if (!pindexPrev) {
+        nNext = 0;
+        nLeft = 0;
+    }
+    else {
+        nNext = pindexPrev->nHeight - pindexPrev->nHeight % Params().GetBudgetCycleBlocks() + Params().GetBudgetCycleBlocks();
+        nLeft = nNext - pindexPrev->nHeight;
+    }
+
+    ui->next_superblock_value->setText(QString::number(nNext));
+    ui->blocks_before_super_value->setText(QString::number(nLeft));
+    ui->time_before_super_value->setText(QString::number(nLeft/60/24));
     ui->alloted_budget_value->setText(QString::number(nTotalAllotted/COIN));
     ui->unallocated_budget_value->setText(QString::number((budget.GetTotalBudget(pindexPrev->nHeight) - nTotalAllotted)/COIN));
-    ui->masternode_count_value->setText(QString::number(mnodeman.CountEnabled(ActiveProtocol())));
+    ui->masternode_count_value->setText(QString::number(mnodeman.stable_size()));
 }
 
 void GovernancePage::setExtendedProposal(CBudgetProposal* proposal)
