@@ -1,7 +1,7 @@
 Grow Core integration/staging repository
 =====================================
 
-[![Build Status](https://travis-ci.org/growaleaf/Grow.svg?branch=master)](https://travis-ci.org/growaleaf/Grow) [![GitHub version](https://img.shields.io/twitter/url/https://github.com/growaleaf/Grow.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=http%3A%2F%2Fgithub.com%2Fgrow%2Fgrow)
+[![Build Status](https://travis-ci.org/GrowCoin-Project/GROW.svg?branch=master)](https://travis-ci.org/GrowCoin-Project/GROW) [![GitHub version](https://img.shields.io/twitter/url/https://travis-ci.org/GrowCoin-Project/GROW.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=http%3A%2F%2Fgithub.com%2Fgrow%2Fgrow)
 
 Grow is a cutting edge cryptocurrency, with many features not available in most other cryptocurrencies.
 - Anonymized transactions using the _Zerocoin Protocol_.
@@ -20,7 +20,7 @@ Grow is a cutting edge cryptocurrency, with many features not available in most 
 <tr><td>Twitter:</td><td> https://twitter.com/GROW_coin</td></tr>
 <tr><td>Telegram:</td><td>https://t.me/GROWcoinOfficial</td></tr>
 <tr><td>Bitcointalk ANN:</td><td> TBD</td></tr>
-<tr><td>Github:</td><td> https://github.com/growaleaf/Grow</td></tr>
+<tr><td>Github:</td><td> https://travis-ci.org/GrowCoin-Project/GROW</td></tr>
 </table>
 
 <table>
