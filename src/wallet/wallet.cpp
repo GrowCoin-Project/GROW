@@ -2126,8 +2126,8 @@ bool CWallet::SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInp
             if (nAmountSelected + out.tx->vout[out.i].nValue > nTargetAmount)
                 continue;
             
-            //if (out.tx->vout[out.i].nValue < Params().StakeInputMinimal())
-            //    continue;
+            if (out.tx->vout[out.i].nValue < Params().StakeInputMinimal())
+               continue;
 
             //if zerocoinspend, then use the block time
             int64_t nTxTime = out.tx->GetTxTime();
@@ -2211,8 +2211,9 @@ bool CWallet::MintableCoins()
                     continue;
                 nTxTime = mapBlockIndex.at(out.tx->hashBlock)->GetBlockTime();
             }
-            //if (out.Value() <= nMinAmount)
-            //    continue;
+            
+            if (out.Value() <= nMinAmount)
+                continue;
 
             if (GetAdjustedTime() - nTxTime > nStakeMinAge)
                 return true;
